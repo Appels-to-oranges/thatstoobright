@@ -1,11 +1,11 @@
-[phases.setup]
-nixPkgs = ["nodejs_20"]
+[variables]
+NIXPACKS_NODE_VERSION = "20"
 
 [phases.install]
-cmds = ["cd site && npm ci"]
+cmds = ["npm --prefix site ci"]
 
 [phases.build]
-cmds = ["cd site && npm run build"]
+cmds = ["npm --prefix site run build"]
 
 [start]
-cmd = "cd site && HOST=0.0.0.0 PORT=$PORT npm run start"
+cmd = "HOST=0.0.0.0 npm --prefix site run start"
