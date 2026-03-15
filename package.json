@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "Lightweight Windows brightness reminder utility",
   "engines": {
-    "node": ">=22.12.0"
+    "node": ">=20.0.0"
   },
   "main": "main.js",
   "author": "payso",
