@@ -2,6 +2,9 @@
   "name": "thatstoobright",
   "version": "1.0.0",
   "description": "Lightweight Windows brightness reminder utility",
+  "engines": {
+    "node": ">=22.12.0"
+  },
   "main": "main.js",
   "author": "payso",
   "scripts": {
