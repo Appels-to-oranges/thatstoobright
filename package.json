@@ -1,0 +1,43 @@
+{
+  "name": "thatstoobright",
+  "version": "1.0.0",
+  "description": "Lightweight Windows brightness reminder utility",
+  "main": "main.js",
+  "author": "payso",
+  "scripts": {
+    "start": "electron .",
+    "build:icon": "png-to-ico -- build/icon.png > build/icon.ico",
+    "build": "npm run build:icon && electron-builder --win portable",
+    "site:dev": "npm --prefix site run dev",
+    "site:build": "npm --prefix site run build",
+    "site:start": "npm --prefix site run start"
+  },
+  "build": {
+    "appId": "com.payso.thatstoobright",
+    "productName": "ThatsTooBright",
+    "win": {
+      "target": "portable",
+      "signAndEditExecutable": false,
+      "icon": "build/icon.ico",
+      "executableName": "ThatsTooBright"
+    },
+    "portable": {
+      "artifactName": "ThatsTooBright.exe"
+    },
+    "files": [
+      "main.js",
+      "preload.js",
+      "public/**/*"
+    ],
+    "directories": {
+      "output": "dist"
+    },
+    "afterPack": "./scripts/after-pack.js"
+  },
+  "devDependencies": {
+    "electron": "^33.0.0",
+    "electron-builder": "^25.1.8",
+    "png-to-ico": "^3.0.1",
+    "rcedit": "^5.0.2"
+  }
+}

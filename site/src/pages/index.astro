@@ -1,0 +1,231 @@
+---
+const downloadUrl = 'https://github.com/payso/thatstoobright/releases/latest/download/ThatsTooBright.exe';
+---
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="generator" content={Astro.generator} />
+    <meta
+      name="description"
+      content="ThatsTooBright is a lightweight Windows tray app that helps reduce late-night eye strain with smart brightness reminders."
+    />
+    <title>ThatsTooBright - Smart Brightness Reminders</title>
+    <style>
+      :root {
+        color-scheme: dark;
+        --bg: #070b14;
+        --bg-soft: #0f1729;
+        --card: #121b2f;
+        --text: #ecf2ff;
+        --muted: #9aaad1;
+        --brand: #facc15;
+        --brand-deep: #ca8a04;
+        --line: #1f2a44;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        font-family: Inter, "Segoe UI", system-ui, sans-serif;
+        color: var(--text);
+        background:
+          radial-gradient(circle at 20% 10%, #243a6f66, transparent 40%),
+          radial-gradient(circle at 80% 0%, #4b216966, transparent 30%),
+          var(--bg);
+      }
+
+      .shell {
+        width: min(1120px, 92vw);
+        margin: 0 auto;
+      }
+
+      header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 20px 0;
+      }
+
+      .brand {
+        font-weight: 700;
+        letter-spacing: 0.2px;
+      }
+
+      .hero {
+        display: grid;
+        grid-template-columns: 1.1fr 0.9fr;
+        gap: 22px;
+        padding: 36px 0 22px;
+      }
+
+      .panel {
+        background: linear-gradient(180deg, #172543cc, #111a2ccc);
+        border: 1px solid var(--line);
+        border-radius: 20px;
+        padding: 28px;
+      }
+
+      h1 {
+        font-size: clamp(2rem, 4vw, 3.4rem);
+        margin: 0 0 14px;
+        line-height: 1.08;
+      }
+
+      p {
+        margin: 0;
+        color: var(--muted);
+        line-height: 1.65;
+      }
+
+      .cta-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+        margin-top: 24px;
+      }
+
+      .btn {
+        text-decoration: none;
+        font-weight: 700;
+        border-radius: 12px;
+        padding: 12px 16px;
+        border: 1px solid transparent;
+        transition: 0.16s ease;
+      }
+
+      .btn-primary {
+        color: #1f1602;
+        background: linear-gradient(135deg, var(--brand-deep), var(--brand));
+      }
+
+      .btn-primary:hover {
+        transform: translateY(-1px);
+        filter: brightness(1.03);
+      }
+
+      .btn-secondary {
+        color: var(--text);
+        border-color: var(--line);
+        background: #10182b;
+      }
+
+      .stats {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+      }
+
+      .stat {
+        border: 1px solid var(--line);
+        border-radius: 14px;
+        padding: 16px;
+        background: #0f182d;
+      }
+
+      .stat strong {
+        display: block;
+        font-size: 1.45rem;
+      }
+
+      .features {
+        margin: 24px 0 44px;
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 14px;
+      }
+
+      .feature {
+        background: var(--card);
+        border: 1px solid var(--line);
+        border-radius: 14px;
+        padding: 18px;
+      }
+
+      .feature h3 {
+        margin: 0 0 8px;
+        font-size: 1rem;
+      }
+
+      footer {
+        margin: 8px 0 34px;
+        color: #7483a9;
+        font-size: 0.9rem;
+      }
+
+      @media (max-width: 900px) {
+        .hero {
+          grid-template-columns: 1fr;
+        }
+        .features {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="shell">
+      <header>
+        <div class="brand">ThatsTooBright</div>
+      </header>
+
+      <section class="hero">
+        <div class="panel">
+          <h1>Smart brightness reminders for better nights.</h1>
+          <p>
+            ThatsTooBright is a lightweight Windows tray app that reminds you to dim your screen
+            after your chosen time and threshold. Keep your eyes comfortable while you work late.
+          </p>
+          <div class="cta-row">
+            <a class="btn btn-primary" href={downloadUrl}>Download for Windows</a>
+            <a class="btn btn-secondary" href="https://github.com/payso/thatstoobright">View on GitHub</a>
+          </div>
+        </div>
+        <div class="panel">
+          <div class="stats">
+            <div class="stat">
+              <strong>Configurable</strong>
+              <p>Choose reminder time, brightness threshold, and snooze duration.</p>
+            </div>
+            <div class="stat">
+              <strong>Tray-first</strong>
+              <p>Runs quietly in your system tray with optional startup behavior.</p>
+            </div>
+            <div class="stat">
+              <strong>Low overhead</strong>
+              <p>Optimized polling and caching to minimize resource usage.</p>
+            </div>
+            <div class="stat">
+              <strong>One-click actions</strong>
+              <p>Dim instantly, set to threshold, snooze, or skip from notification.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="features">
+        <article class="feature">
+          <h3>Context-aware reminders</h3>
+          <p>Only triggers after your configured start time and above your brightness threshold.</p>
+        </article>
+        <article class="feature">
+          <h3>Reliable startup controls</h3>
+          <p>Enable launch at login and optionally start minimized directly to tray.</p>
+        </article>
+        <article class="feature">
+          <h3>Real-time brightness syncing</h3>
+          <p>Slider view stays synced to actual monitor brightness without jumpy behavior.</p>
+        </article>
+      </section>
+
+      <footer>
+        Built for Windows users who work late and want less eye strain.
+      </footer>
+    </div>
+  </body>
+</html>

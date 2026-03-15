@@ -1,0 +1,687 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ThatsTooBright</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    html, body {
+      overflow: hidden;
+      background: transparent;
+    }
+
+    body {
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      color: #e4e4e7;
+      user-select: none;
+    }
+
+    .titlebar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      -webkit-app-region: drag;
+      padding: 8px 14px;
+      background: #16161c;
+      border-radius: 16px 16px 0 0;
+    }
+
+    .titlebar-actions {
+      display: flex;
+      gap: 8px;
+      -webkit-app-region: no-drag;
+    }
+
+    .titlebar-btn {
+      -webkit-app-region: no-drag;
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      border: none;
+      cursor: pointer;
+      transition: opacity 0.15s;
+    }
+
+    .btn-close { background: #ef4444; }
+    .btn-settings {
+      background: #52525b;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .btn-settings:hover { background: #71717a; }
+    .titlebar-btn:hover { opacity: 0.8; }
+
+    .titlebar-title {
+      font-size: 12px;
+      color: #52525b;
+      -webkit-app-region: drag;
+    }
+
+    .card {
+      background: #1a1a22;
+      border: 1px solid #2a2a35;
+      border-top: none;
+      border-radius: 0 0 16px 16px;
+      padding: 22px 26px 24px;
+      flex: 1;
+      overflow-y: auto;
+    }
+
+    .header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 22px;
+    }
+
+    .header svg {
+      width: 28px;
+      height: 28px;
+      fill: #facc15;
+      flex-shrink: 0;
+    }
+
+    .header h1 {
+      font-size: 20px;
+      font-weight: 600;
+      letter-spacing: -0.3px;
+    }
+
+    .brightness-display {
+      text-align: center;
+      margin-bottom: 28px;
+    }
+
+    .brightness-value {
+      font-size: 72px;
+      font-weight: 700;
+      letter-spacing: -2px;
+      line-height: 1;
+      background: linear-gradient(135deg, #facc15, #f59e0b);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      transition: opacity 0.2s;
+    }
+
+    .brightness-value.loading { opacity: 0.3; }
+
+    .brightness-label {
+      font-size: 13px;
+      color: #71717a;
+      margin-top: 6px;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+    }
+
+    .slider-container {
+      position: relative;
+      margin-bottom: 24px;
+    }
+
+    .slider-track {
+      position: relative;
+      height: 10px;
+      background: #27272f;
+      border-radius: 5px;
+      overflow: hidden;
+      cursor: pointer;
+    }
+
+    .slider-fill {
+      position: absolute;
+      left: 0; top: 0;
+      height: 100%;
+      background: linear-gradient(90deg, #ca8a04, #facc15);
+      border-radius: 5px;
+      transition: width 0.1s ease;
+      pointer-events: none;
+    }
+
+    input[type="range"] {
+      -webkit-appearance: none;
+      appearance: none;
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%;
+      height: 10px;
+      background: transparent;
+      cursor: pointer;
+      margin: 0;
+    }
+
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 22px; height: 22px;
+      border-radius: 50%;
+      background: #facc15;
+      border: 3px solid #1a1a22;
+      box-shadow: 0 2px 8px rgba(250, 204, 21, 0.35);
+      cursor: grab;
+      margin-top: -6px;
+    }
+
+    input[type="range"]:active::-webkit-slider-thumb { cursor: grabbing; }
+
+    .slider-labels {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 10px;
+      font-size: 12px;
+      color: #52525b;
+    }
+
+    .presets {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+    }
+
+    .preset-btn {
+      background: #27272f;
+      border: 1px solid #333340;
+      border-radius: 10px;
+      padding: 10px 0;
+      color: #a1a1aa;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+
+    .preset-btn:hover {
+      background: #333340;
+      color: #facc15;
+      border-color: #facc1540;
+    }
+
+    .preset-btn:active { transform: scale(0.95); }
+
+    .status {
+      text-align: center;
+      margin-top: 20px;
+      font-size: 12px;
+      color: #52525b;
+      min-height: 18px;
+      transition: color 0.3s;
+    }
+
+    .status.error { color: #ef4444; }
+    .status.success { color: #22c55e; }
+
+    .configure-btn {
+      width: 100%;
+      margin-top: 12px;
+      background: #27272f;
+      border: 1px solid #333340;
+      border-radius: 10px;
+      padding: 10px 0;
+      color: #e4e4e7;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+
+    .configure-btn:hover {
+      border-color: #facc1540;
+      color: #facc15;
+      background: #333340;
+    }
+
+    /* --- Settings page --- */
+
+    .page { display: none; flex-direction: column; min-height: 100%; }
+    .page.active { display: flex; }
+    #pageSettings { overflow-y: auto; padding-right: 2px; }
+
+    .settings-section {
+      margin-bottom: 16px;
+    }
+
+    .settings-section label {
+      display: block;
+      font-size: 13px;
+      color: #a1a1aa;
+      margin-bottom: 10px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .settings-section p {
+      font-size: 12px;
+      color: #52525b;
+      margin-top: 8px;
+      line-height: 1.5;
+    }
+
+    .time-input-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .time-input {
+      background: #27272f;
+      border: 1px solid #333340;
+      border-radius: 10px;
+      padding: 12px 16px;
+      color: #e4e4e7;
+      font-size: 18px;
+      font-family: inherit;
+      font-weight: 600;
+      width: 100%;
+      text-align: center;
+      outline: none;
+      transition: border-color 0.15s;
+    }
+
+    .time-input:focus {
+      border-color: #facc15;
+    }
+
+    input[type="time"]::-webkit-calendar-picker-indicator {
+      filter: invert(0.7);
+      cursor: pointer;
+    }
+
+    .number-input {
+      width: 100%;
+      background: #27272f;
+      border: 1px solid #333340;
+      border-radius: 10px;
+      padding: 10px 12px;
+      color: #e4e4e7;
+      font-size: 15px;
+      font-family: inherit;
+      outline: none;
+      transition: border-color 0.15s;
+    }
+
+    .number-input:focus {
+      border-color: #facc15;
+    }
+
+    .toggle-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      background: #27272f;
+      border: 1px solid #333340;
+      border-radius: 10px;
+      padding: 12px 14px;
+      margin-bottom: 10px;
+    }
+
+    .toggle-row span {
+      font-size: 14px;
+      color: #d4d4d8;
+    }
+
+    .toggle-row input[type="checkbox"] {
+      width: 18px;
+      height: 18px;
+      accent-color: #facc15;
+      cursor: pointer;
+    }
+
+    .save-btn {
+      width: 100%;
+      background: linear-gradient(135deg, #ca8a04, #facc15);
+      border: none;
+      border-radius: 10px;
+      padding: 12px 0;
+      color: #1a1a22;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: opacity 0.15s, transform 0.1s;
+      margin-top: 4px;
+    }
+
+    .save-btn:hover { opacity: 0.9; }
+    .save-btn:active { transform: scale(0.98); }
+
+    .current-schedule {
+      background: #27272f;
+      border: 1px solid #333340;
+      border-radius: 10px;
+      padding: 14px 18px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-top: 16px;
+    }
+
+    .current-schedule svg {
+      width: 18px; height: 18px;
+      fill: #facc15;
+      flex-shrink: 0;
+    }
+
+    .current-schedule span {
+      font-size: 13px;
+      color: #a1a1aa;
+    }
+
+    .current-schedule strong {
+      color: #facc15;
+    }
+
+    .back-label {
+      font-size: 12px;
+      color: #a1a1aa;
+      cursor: pointer;
+      -webkit-app-region: no-drag;
+    }
+
+    .back-label:hover { color: #facc15; }
+  </style>
+</head>
+<body>
+  <div class="titlebar">
+    <span class="titlebar-title" id="titleText">ThatsTooBright</span>
+    <div class="titlebar-actions">
+      <button class="titlebar-btn btn-settings" id="settingsBtn" title="Settings">
+        <svg width="10" height="10" viewBox="0 0 24 24" fill="#a1a1aa"><path d="M19.14 12.94c.04-.31.06-.63.06-.94 0-.31-.02-.63-.06-.94l2.03-1.58a.49.49 0 00.12-.61l-1.92-3.32a.49.49 0 00-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54a.48.48 0 00-.48-.41h-3.84a.48.48 0 00-.48.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96a.49.49 0 00-.59.22L2.74 8.87a.48.48 0 00.12.61l2.03 1.58c-.04.31-.06.63-.06.94s.02.63.06.94l-2.03 1.58a.49.49 0 00-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.26.41.48.41h3.84c.24 0 .44-.17.48-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6A3.6 3.6 0 1112 8.4a3.6 3.6 0 010 7.2z"/></svg>
+      </button>
+      <button class="titlebar-btn btn-close" id="closeBtn" title="Minimize to tray"></button>
+    </div>
+  </div>
+
+  <div class="card">
+    <!-- Brightness page -->
+    <div class="page active" id="pageBrightness">
+      <div class="header">
+        <svg viewBox="0 0 24 24"><path d="M12 7c-2.76 0-5 2.24-5 5s2.24 5 5 5 5-2.24 5-5-2.24-5-5-5zM2 13h2c.55 0 1-.45 1-1s-.45-1-1-1H2c-.55 0-1 .45-1 1s.45 1 1 1zm18 0h2c.55 0 1-.45 1-1s-.45-1-1-1h-2c-.55 0-1 .45-1 1s.45 1 1 1zM11 2v2c0 .55.45 1 1 1s1-.45 1-1V2c0-.55-.45-1-1-1s-1 .45-1 1zm0 18v2c0 .55.45 1 1 1s1-.45 1-1v-2c0-.55-.45-1-1-1s-1 .45-1 1zM5.99 4.58a.996.996 0 00-1.41 0 .996.996 0 000 1.41l1.06 1.06c.39.39 1.03.39 1.41 0s.39-1.03 0-1.41L5.99 4.58zm12.37 12.37a.996.996 0 00-1.41 0 .996.996 0 000 1.41l1.06 1.06c.39.39 1.03.39 1.41 0a.996.996 0 000-1.41l-1.06-1.06zm1.06-10.96a.996.996 0 000-1.41.996.996 0 00-1.41 0l-1.06 1.06c-.39.39-.39 1.03 0 1.41s1.03.39 1.41 0l1.06-1.06zM7.05 18.36a.996.996 0 000-1.41.996.996 0 00-1.41 0l-1.06 1.06c-.39.39-.39 1.03 0 1.41s1.03.39 1.41 0l1.06-1.06z"/></svg>
+        <h1>ThatsTooBright</h1>
+      </div>
+
+      <div class="brightness-display">
+        <div class="brightness-value loading" id="brightnessValue">--</div>
+        <div class="brightness-label">Current Level</div>
+      </div>
+
+      <div class="slider-container">
+        <div class="slider-track">
+          <div class="slider-fill" id="sliderFill"></div>
+          <input type="range" id="brightnessSlider" min="0" max="100" value="50" />
+        </div>
+        <div class="slider-labels">
+          <span>0%</span>
+          <span>100%</span>
+        </div>
+      </div>
+
+      <div class="presets">
+        <button class="preset-btn" data-value="10">10%</button>
+        <button class="preset-btn" data-value="25">25%</button>
+        <button class="preset-btn" data-value="50">50%</button>
+        <button class="preset-btn" data-value="75">75%</button>
+      </div>
+
+      <div class="current-schedule" id="scheduleDisplay">
+        <svg viewBox="0 0 24 24"><path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67z"/></svg>
+        <span>Reminder active after <strong id="scheduleTime">9:00 PM</strong> and above <strong id="scheduleThreshold">50%</strong></span>
+      </div>
+      <button class="configure-btn" id="configureBtn">Configure Reminder</button>
+
+      <div class="status" id="status"></div>
+    </div>
+
+    <!-- Settings page -->
+    <div class="page" id="pageSettings">
+      <div class="header">
+        <svg viewBox="0 0 24 24" fill="#facc15" width="28" height="28"><path d="M19.14 12.94c.04-.31.06-.63.06-.94 0-.31-.02-.63-.06-.94l2.03-1.58a.49.49 0 00.12-.61l-1.92-3.32a.49.49 0 00-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54a.48.48 0 00-.48-.41h-3.84a.48.48 0 00-.48.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96a.49.49 0 00-.59.22L2.74 8.87a.48.48 0 00.12.61l2.03 1.58c-.04.31-.06.63-.06.94s.02.63.06.94l-2.03 1.58a.49.49 0 00-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.26.41.48.41h3.84c.24 0 .44-.17.48-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6A3.6 3.6 0 1112 8.4a3.6 3.6 0 010 7.2z"/></svg>
+        <h1>Settings</h1>
+      </div>
+
+      <div class="settings-section">
+        <label for="nightTime">Reminder Start Time</label>
+        <input type="time" id="nightTime" class="time-input" value="21:00" />
+        <p>The app will check your brightness every 30 minutes after this time and remind you to dim it.</p>
+      </div>
+
+      <div class="settings-section">
+        <label for="thresholdSlider">Brightness Threshold</label>
+        <div class="slider-track">
+          <div class="slider-fill" id="thresholdFill"></div>
+          <input type="range" id="thresholdSlider" min="0" max="100" value="50" />
+        </div>
+        <div class="slider-labels">
+          <span>0%</span>
+          <span id="thresholdValue">50%</span>
+        </div>
+        <p>Only notify when brightness is above this threshold after the selected start time.</p>
+      </div>
+
+      <div class="settings-section">
+        <label for="snoozeMinutes">Snooze Duration (Minutes)</label>
+        <input type="number" id="snoozeMinutes" class="number-input" value="30" min="1" max="180" />
+        <p>The reminder dialog will include a snooze button using this duration.</p>
+      </div>
+
+      <div class="settings-section">
+        <label>Startup</label>
+        <div class="toggle-row">
+          <span>Start app when Windows starts</span>
+          <input type="checkbox" id="startOnLogin" />
+        </div>
+        <div class="toggle-row">
+          <span>Start minimized to tray</span>
+          <input type="checkbox" id="startMinimized" />
+        </div>
+      </div>
+
+      <button class="save-btn" id="saveBtn">Save Settings</button>
+
+      <div class="status" id="settingsStatus"></div>
+    </div>
+  </div>
+
+  <script>
+    const slider = document.getElementById("brightnessSlider");
+    const fill = document.getElementById("sliderFill");
+    const valueDisplay = document.getElementById("brightnessValue");
+    const statusEl = document.getElementById("status");
+    const settingsStatusEl = document.getElementById("settingsStatus");
+    const nightTimeInput = document.getElementById("nightTime");
+    const scheduleTimeEl = document.getElementById("scheduleTime");
+    const scheduleThresholdEl = document.getElementById("scheduleThreshold");
+    const thresholdSlider = document.getElementById("thresholdSlider");
+    const thresholdFill = document.getElementById("thresholdFill");
+    const thresholdValue = document.getElementById("thresholdValue");
+    const snoozeMinutesInput = document.getElementById("snoozeMinutes");
+    const startOnLoginInput = document.getElementById("startOnLogin");
+    const startMinimizedInput = document.getElementById("startMinimized");
+    const titleText = document.getElementById("titleText");
+
+    const pageBrightness = document.getElementById("pageBrightness");
+    const pageSettings = document.getElementById("pageSettings");
+
+    let debounceTimer = null;
+    let onSettingsPage = false;
+    let brightnessRefreshTimer = null;
+    let sliderIsInteracting = false;
+    let isApplyingBrightness = false;
+    let suppressSyncUntil = 0;
+
+    // --- Page navigation ---
+
+    function setSettingsPage(isSettingsPage) {
+      onSettingsPage = isSettingsPage;
+      pageBrightness.classList.toggle("active", !onSettingsPage);
+      pageSettings.classList.toggle("active", onSettingsPage);
+      titleText.textContent = onSettingsPage ? "Settings" : "ThatsTooBright";
+    }
+
+    document.getElementById("settingsBtn").addEventListener("click", () => {
+      setSettingsPage(!onSettingsPage);
+    });
+
+    document.getElementById("configureBtn").addEventListener("click", () => {
+      setSettingsPage(true);
+    });
+
+    document.getElementById("closeBtn").addEventListener("click", () => {
+      window.brightness.minimizeToTray();
+    });
+
+    // --- Brightness controls ---
+
+    function updateUI(value) {
+      valueDisplay.textContent = value + "%";
+      valueDisplay.classList.remove("loading");
+      slider.value = value;
+      fill.style.width = value + "%";
+    }
+
+    function showStatus(el, msg, type = "") {
+      el.textContent = msg;
+      el.className = "status " + type;
+      if (type === "success") {
+        setTimeout(() => { el.textContent = ""; el.className = "status"; }, 2000);
+      }
+    }
+
+    async function fetchBrightness() {
+      if (sliderIsInteracting || isApplyingBrightness || Date.now() < suppressSyncUntil) return;
+      try {
+        const level = await window.brightness.get();
+        updateUI(level);
+      } catch (err) {
+        showStatus(statusEl, "Could not read brightness: " + err.message, "error");
+      }
+    }
+
+    async function setBrightness(value) {
+      isApplyingBrightness = true;
+      suppressSyncUntil = Date.now() + 1200;
+      updateUI(value);
+      try {
+        const level = await window.brightness.set(value);
+        updateUI(level);
+        showStatus(statusEl, "Set to " + level + "%", "success");
+      } catch (err) {
+        showStatus(statusEl, "Failed: " + err.message, "error");
+      } finally {
+        isApplyingBrightness = false;
+        suppressSyncUntil = Date.now() + 600;
+      }
+    }
+
+    function startBrightnessAutoRefresh() {
+      if (brightnessRefreshTimer) clearInterval(brightnessRefreshTimer);
+      brightnessRefreshTimer = setInterval(() => {
+        if (!sliderIsInteracting && !document.hidden && !onSettingsPage) fetchBrightness();
+      }, 3000);
+    }
+
+    slider.addEventListener("input", () => {
+      sliderIsInteracting = true;
+      const val = parseInt(slider.value, 10);
+      valueDisplay.textContent = val + "%";
+      fill.style.width = val + "%";
+      clearTimeout(debounceTimer);
+      debounceTimer = setTimeout(() => setBrightness(val), 200);
+    });
+
+    slider.addEventListener("pointerup", () => {
+      sliderIsInteracting = false;
+    });
+
+    slider.addEventListener("change", () => {
+      sliderIsInteracting = false;
+    });
+
+    slider.addEventListener("pointercancel", () => {
+      sliderIsInteracting = false;
+    });
+
+    document.querySelectorAll(".preset-btn").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        setBrightness(parseInt(btn.dataset.value, 10));
+      });
+    });
+
+    window.brightness.onBrightnessUpdated(() => fetchBrightness());
+
+    // --- Settings ---
+
+    function formatTime(hour, minute) {
+      const period = hour >= 12 ? "PM" : "AM";
+      const display = hour === 0 ? 12 : hour > 12 ? hour - 12 : hour;
+      return display + ":" + String(minute).padStart(2, "0") + " " + period;
+    }
+
+    async function loadSettings() {
+      const s = await window.brightness.getSettings();
+      nightTimeInput.value =
+        String(s.nightHour).padStart(2, "0") + ":" + String(s.nightMinute).padStart(2, "0");
+      scheduleTimeEl.textContent = formatTime(s.nightHour, s.nightMinute);
+      thresholdSlider.value = s.brightnessThreshold;
+      thresholdFill.style.width = s.brightnessThreshold + "%";
+      thresholdValue.textContent = s.brightnessThreshold + "%";
+      scheduleThresholdEl.textContent = s.brightnessThreshold + "%";
+      snoozeMinutesInput.value = s.snoozeMinutes;
+      startOnLoginInput.checked = !!s.startOnLogin;
+      startMinimizedInput.checked = !!s.startMinimized;
+      startMinimizedInput.disabled = !startOnLoginInput.checked;
+    }
+
+    thresholdSlider.addEventListener("input", () => {
+      const threshold = parseInt(thresholdSlider.value, 10);
+      thresholdFill.style.width = threshold + "%";
+      thresholdValue.textContent = threshold + "%";
+    });
+
+    startOnLoginInput.addEventListener("change", () => {
+      if (!startOnLoginInput.checked) startMinimizedInput.checked = false;
+      startMinimizedInput.disabled = !startOnLoginInput.checked;
+    });
+
+    document.getElementById("saveBtn").addEventListener("click", async () => {
+      const [h, m] = nightTimeInput.value.split(":").map(Number);
+      const threshold = parseInt(thresholdSlider.value, 10);
+      const snoozeMinutes = parseInt(snoozeMinutesInput.value, 10);
+      try {
+        const s = await window.brightness.saveSettings({
+          nightHour: h,
+          nightMinute: m,
+          brightnessThreshold: threshold,
+          snoozeMinutes,
+          startOnLogin: startOnLoginInput.checked,
+          startMinimized: startMinimizedInput.checked,
+        });
+        scheduleTimeEl.textContent = formatTime(s.nightHour, s.nightMinute);
+        scheduleThresholdEl.textContent = s.brightnessThreshold + "%";
+        snoozeMinutesInput.value = s.snoozeMinutes;
+        startOnLoginInput.checked = !!s.startOnLogin;
+        startMinimizedInput.checked = !!s.startMinimized;
+        startMinimizedInput.disabled = !startOnLoginInput.checked;
+        showStatus(settingsStatusEl, "Settings saved!", "success");
+        setSettingsPage(false);
+      } catch (err) {
+        showStatus(settingsStatusEl, "Failed to save: " + err.message, "error");
+      }
+    });
+
+    // --- Init ---
+
+    fetchBrightness();
+    loadSettings();
+    startBrightnessAutoRefresh();
+
+    window.addEventListener("beforeunload", () => {
+      if (brightnessRefreshTimer) clearInterval(brightnessRefreshTimer);
+    });
+  </script>
+</body>
+</html>
