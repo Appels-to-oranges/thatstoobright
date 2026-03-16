@@ -9,6 +9,8 @@ let nightCheckInterval = null;
 let settings = {
   nightHour: 21,
   nightMinute: 0,
+  endHour: 6,
+  endMinute: 0,
   brightnessThreshold: 50,
   snoozeMinutes: 30,
   startOnLogin: false,
@@ -40,6 +42,8 @@ function loadSettings() {
       const data = JSON.parse(fs.readFileSync(SETTINGS_PATH, "utf-8"));
       settings.nightHour = toBoundedInteger(data.nightHour, 0, 23, 21);
       settings.nightMinute = toBoundedInteger(data.nightMinute, 0, 59, 0);
+      settings.endHour = toBoundedInteger(data.endHour, 0, 23, 6);
+      settings.endMinute = toBoundedInteger(data.endMinute, 0, 59, 0);
       settings.brightnessThreshold = toBoundedInteger(data.brightnessThreshold, 0, 100, 50);
       settings.snoozeMinutes = toBoundedInteger(data.snoozeMinutes, 1, 180, 30);
       settings.startOnLogin = !!data.startOnLogin;
@@ -189,8 +193,15 @@ function createTray() {
 function isNightTime() {
   const now = new Date();
   const currentMinutes = now.getHours() * 60 + now.getMinutes();
-  const nightMinutes = settings.nightHour * 60 + settings.nightMinute;
-  return currentMinutes >= nightMinutes;
+  const startMinutes = settings.nightHour * 60 + settings.nightMinute;
+  const endMinutes = settings.endHour * 60 + settings.endMinute;
+
+  if (startMinutes === endMinutes) return true;
+  if (startMinutes < endMinutes) {
+    return currentMinutes >= startMinutes && currentMinutes < endMinutes;
+  }
+
+  return currentMinutes >= startMinutes || currentMinutes < endMinutes;
 }
 
 function formatNightTime() {
@@ -273,6 +284,8 @@ ipcMain.handle("get-settings", () => ({ ...settings }));
 ipcMain.handle("save-settings", (_event, newSettings) => {
   settings.nightHour = toBoundedInteger(newSettings.nightHour, 0, 23, 21);
   settings.nightMinute = toBoundedInteger(newSettings.nightMinute, 0, 59, 0);
+  settings.endHour = toBoundedInteger(newSettings.endHour, 0, 23, 6);
+  settings.endMinute = toBoundedInteger(newSettings.endMinute, 0, 59, 0);
   settings.brightnessThreshold = toBoundedInteger(newSettings.brightnessThreshold, 0, 100, 50);
   settings.snoozeMinutes = toBoundedInteger(newSettings.snoozeMinutes, 1, 180, 30);
   settings.startOnLogin = !!newSettings.startOnLogin;

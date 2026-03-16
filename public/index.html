@@ -429,7 +429,7 @@
 
       <div class="current-schedule" id="scheduleDisplay">
         <svg viewBox="0 0 24 24"><path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67z"/></svg>
-        <span>Reminder active after <strong id="scheduleTime">9:00 PM</strong> and above <strong id="scheduleThreshold">50%</strong></span>
+        <span>Reminder active from <strong id="scheduleTime">9:00 PM</strong> to <strong id="scheduleEndTime">6:00 AM</strong> above <strong id="scheduleThreshold">50%</strong></span>
       </div>
       <button class="configure-btn" id="configureBtn">Configure Reminder</button>
 
@@ -446,7 +446,13 @@
       <div class="settings-section">
         <label for="nightTime">Reminder Start Time</label>
         <input type="time" id="nightTime" class="time-input" value="21:00" />
-        <p>The app will check your brightness every 30 minutes after this time and remind you to dim it.</p>
+        <p>The app will check brightness every 30 minutes while inside your reminder window.</p>
+      </div>
+
+      <div class="settings-section">
+        <label for="endTime">Reminder End Time</label>
+        <input type="time" id="endTime" class="time-input" value="06:00" />
+        <p>Default is 6:00 AM. Reminders stop after this time.</p>
       </div>
 
       <div class="settings-section">
@@ -493,7 +499,9 @@
     const statusEl = document.getElementById("status");
     const settingsStatusEl = document.getElementById("settingsStatus");
     const nightTimeInput = document.getElementById("nightTime");
+    const endTimeInput = document.getElementById("endTime");
     const scheduleTimeEl = document.getElementById("scheduleTime");
+    const scheduleEndTimeEl = document.getElementById("scheduleEndTime");
     const scheduleThresholdEl = document.getElementById("scheduleThreshold");
     const thresholdSlider = document.getElementById("thresholdSlider");
     const thresholdFill = document.getElementById("thresholdFill");
@@ -625,7 +633,10 @@
       const s = await window.brightness.getSettings();
       nightTimeInput.value =
         String(s.nightHour).padStart(2, "0") + ":" + String(s.nightMinute).padStart(2, "0");
+      endTimeInput.value =
+        String(s.endHour).padStart(2, "0") + ":" + String(s.endMinute).padStart(2, "0");
       scheduleTimeEl.textContent = formatTime(s.nightHour, s.nightMinute);
+      scheduleEndTimeEl.textContent = formatTime(s.endHour, s.endMinute);
       thresholdSlider.value = s.brightnessThreshold;
       thresholdFill.style.width = s.brightnessThreshold + "%";
       thresholdValue.textContent = s.brightnessThreshold + "%";
@@ -649,18 +660,22 @@
 
     document.getElementById("saveBtn").addEventListener("click", async () => {
       const [h, m] = nightTimeInput.value.split(":").map(Number);
+      const [endH, endM] = endTimeInput.value.split(":").map(Number);
       const threshold = parseInt(thresholdSlider.value, 10);
       const snoozeMinutes = parseInt(snoozeMinutesInput.value, 10);
       try {
         const s = await window.brightness.saveSettings({
           nightHour: h,
           nightMinute: m,
+          endHour: endH,
+          endMinute: endM,
           brightnessThreshold: threshold,
           snoozeMinutes,
           startOnLogin: startOnLoginInput.checked,
           startMinimized: startMinimizedInput.checked,
         });
         scheduleTimeEl.textContent = formatTime(s.nightHour, s.nightMinute);
+        scheduleEndTimeEl.textContent = formatTime(s.endHour, s.endMinute);
         scheduleThresholdEl.textContent = s.brightnessThreshold + "%";
         snoozeMinutesInput.value = s.snoozeMinutes;
         startOnLoginInput.checked = !!s.startOnLogin;
