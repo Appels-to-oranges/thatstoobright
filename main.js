@@ -47,7 +47,8 @@ function loadSettings() {
       settings.brightnessThreshold = toBoundedInteger(data.brightnessThreshold, 0, 100, 50);
       settings.snoozeMinutes = toBoundedInteger(data.snoozeMinutes, 1, 180, 30);
       settings.startOnLogin = !!data.startOnLogin;
-      settings.startMinimized = !!data.startMinimized;
+      // Keep "start minimized" off by default unless startup is enabled.
+      settings.startMinimized = !!data.startMinimized && settings.startOnLogin;
     }
   } catch {
     // defaults are fine
@@ -135,7 +136,9 @@ function createWindow() {
   mainWindow = new BrowserWindow({
     width: 420,
     height: 720,
-    resizable: false,
+    minWidth: 420,
+    minHeight: 680,
+    resizable: true,
     frame: false,
     transparent: true,
     show: false,
