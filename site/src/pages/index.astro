@@ -6,7 +6,8 @@ const downloadUrl = `${repoUrl}/releases/latest/download/ThatsTooBright.exe`;
 <html lang="en">
   <head>
     <meta charset="utf-8" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon.png" />
+    <link rel="icon" href="/favicon.ico" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="generator" content={Astro.generator} />
     <meta
@@ -154,31 +155,46 @@ const downloadUrl = `${repoUrl}/releases/latest/download/ThatsTooBright.exe`;
       }
 
       .donate {
-        margin: 0 0 24px;
+        margin: 2px 0 20px;
       }
 
       .donate-card {
-        background: #0f182d;
+        background: linear-gradient(180deg, #121b2f, #10182b);
         border: 1px solid var(--line);
         border-radius: 14px;
-        padding: 18px;
+        padding: 14px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 14px;
       }
 
       .donate-card h2 {
-        margin: 0 0 8px;
-        font-size: 1.05rem;
+        margin: 0 0 4px;
+        font-size: 0.95rem;
       }
 
       .donate-card p {
-        margin-bottom: 12px;
+        margin: 0;
+        font-size: 0.88rem;
+        color: var(--muted);
       }
 
-      .kofi-embed {
-        width: 100%;
-        min-height: 650px;
-        border: 0;
+      .donate-link {
+        text-decoration: none;
+        white-space: nowrap;
+        font-weight: 700;
+        font-size: 0.9rem;
+        color: #1f1602;
+        background: linear-gradient(135deg, var(--brand-deep), var(--brand));
         border-radius: 10px;
-        background: #0b1120;
+        padding: 10px 14px;
+        transition: 0.16s ease;
+      }
+
+      .donate-link:hover {
+        transform: translateY(-1px);
+        filter: brightness(1.03);
       }
 
       footer {
@@ -193,6 +209,10 @@ const downloadUrl = `${repoUrl}/releases/latest/download/ThatsTooBright.exe`;
         }
         .features {
           grid-template-columns: 1fr;
+        }
+        .donate-card {
+          flex-direction: column;
+          align-items: flex-start;
         }
       }
     </style>
@@ -254,13 +274,16 @@ const downloadUrl = `${repoUrl}/releases/latest/download/ThatsTooBright.exe`;
 
       <section class="donate">
         <div class="donate-card">
-          <h2>Support ThatsTooBright</h2>
-          <p>If this app helps you, you can support development directly via Ko-fi.</p>
-          <iframe
-            class="kofi-embed"
-            title="Ko-fi donation embed"
-            src="https://ko-fi.com/paysoncarpenter/?hidefeed=true&widget=true&embed=true"
-          ></iframe>
+          <div>
+            <h2>Support ThatsTooBright</h2>
+            <p>If it helps your workflow, a small Ko-fi tip keeps updates coming.</p>
+          </div>
+          <a
+            class="donate-link"
+            href="https://ko-fi.com/paysoncarpenter"
+            target="_blank"
+            rel="noopener noreferrer"
+          >Donate on Ko-fi</a>
         </div>
       </section>
 
