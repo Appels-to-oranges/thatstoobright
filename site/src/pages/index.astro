@@ -153,6 +153,34 @@ const downloadUrl = `${repoUrl}/releases/latest/download/ThatsTooBright.exe`;
         font-size: 1rem;
       }
 
+      .donate {
+        margin: 0 0 24px;
+      }
+
+      .donate-card {
+        background: #0f182d;
+        border: 1px solid var(--line);
+        border-radius: 14px;
+        padding: 18px;
+      }
+
+      .donate-card h2 {
+        margin: 0 0 8px;
+        font-size: 1.05rem;
+      }
+
+      .donate-card p {
+        margin-bottom: 12px;
+      }
+
+      .kofi-embed {
+        width: 100%;
+        min-height: 650px;
+        border: 0;
+        border-radius: 10px;
+        background: #0b1120;
+      }
+
       footer {
         margin: 8px 0 34px;
         color: #7483a9;
@@ -222,6 +250,18 @@ const downloadUrl = `${repoUrl}/releases/latest/download/ThatsTooBright.exe`;
           <h3>Real-time brightness syncing</h3>
           <p>Slider view stays synced to actual monitor brightness without jumpy behavior.</p>
         </article>
+      </section>
+
+      <section class="donate">
+        <div class="donate-card">
+          <h2>Support ThatsTooBright</h2>
+          <p>If this app helps you, you can support development directly via Ko-fi.</p>
+          <iframe
+            class="kofi-embed"
+            title="Ko-fi donation embed"
+            src="https://ko-fi.com/paysoncarpenter/?hidefeed=true&widget=true&embed=true"
+          ></iframe>
+        </div>
       </section>
 
       <footer>
