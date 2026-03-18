@@ -1,4 +1,4 @@
-const { app, BrowserWindow, ipcMain, Tray, Menu, dialog, nativeImage } = require("electron");
+const { app, BrowserWindow, ipcMain, Tray, Menu, dialog, nativeImage, Notification } = require("electron");
 const { exec } = require("child_process");
 const path = require("path");
 const fs = require("fs");
@@ -20,6 +20,9 @@ let lastBrightnessValue = null;
 let lastBrightnessAt = 0;
 let brightnessInFlight = null;
 let snoozeUntilMs = 0;
+let remindersDisabledUntilMs = 0;
+let reminderDialogOpen = false;
+let reminderNotification = null;
 
 const SETTINGS_PATH = path.join(app.getPath("userData"), "settings.json");
 const CHECK_INTERVAL_MS = 30 * 60 * 1000;
@@ -215,6 +218,98 @@ function formatNightTime() {
   return `${display}:${String(m).padStart(2, "0")} ${period}`;
 }
 
+function showReminderToast(brightness) {
+  if (!Notification.isSupported()) return false;
+
+  if (reminderNotification) {
+    reminderNotification.close();
+    reminderNotification = null;
+  }
+
+  const notification = new Notification({
+    title: "ThatsTooBright Reminder",
+    body: `Brightness is ${brightness}% (limit: ${settings.brightnessThreshold}%). Click for quick actions.`,
+    icon: ICON_PATH,
+    silent: false,
+    actions: [
+      { type: "button", text: "Dim now" },
+      { type: "button", text: `Set ${settings.brightnessThreshold}%` },
+    ],
+  });
+
+  notification.on("action", async (_event, index) => {
+    if (index === 0) {
+      await setBrightnessLevel(0);
+      mainWindow.webContents.send("brightness-updated");
+    } else if (index === 1) {
+      await setBrightnessLevel(settings.brightnessThreshold);
+      mainWindow.webContents.send("brightness-updated");
+    }
+  });
+
+  notification.on("click", () => {
+    openReminderActionDialog(brightness);
+  });
+
+  notification.on("close", () => {
+    if (reminderNotification === notification) {
+      reminderNotification = null;
+    }
+  });
+
+  reminderNotification = notification;
+  notification.show();
+  return true;
+}
+
+async function openReminderActionDialog(brightness) {
+  if (reminderDialogOpen) return;
+  reminderDialogOpen = true;
+
+  if (reminderNotification) {
+    reminderNotification.close();
+    reminderNotification = null;
+  }
+
+  try {
+    if (!mainWindow) return;
+    mainWindow.show();
+    mainWindow.focus();
+
+    const response = await dialog.showMessageBox(mainWindow, {
+      type: "question",
+      icon: getAppIcon(),
+      title: "Brightness Reminder",
+      message: `It's past ${formatNightTime()} and brightness is ${brightness}% (limit: ${settings.brightnessThreshold}%).`,
+      detail: "Choose an action below.",
+      buttons: [
+        "Dim to 0%",
+        `Set to ${settings.brightnessThreshold}%`,
+        `Snooze ${settings.snoozeMinutes} min`,
+        "Disable 12h",
+        "Not now",
+      ],
+      defaultId: 0,
+      cancelId: 4,
+      noLink: true,
+    });
+
+    if (response.response === 0) {
+      await setBrightnessLevel(0);
+      mainWindow.webContents.send("brightness-updated");
+    } else if (response.response === 1) {
+      await setBrightnessLevel(settings.brightnessThreshold);
+      mainWindow.webContents.send("brightness-updated");
+    } else if (response.response === 2) {
+      snoozeUntilMs = Date.now() + settings.snoozeMinutes * 60 * 1000;
+    } else if (response.response === 3) {
+      remindersDisabledUntilMs = Date.now() + 12 * 60 * 60 * 1000;
+    }
+  } finally {
+    reminderDialogOpen = false;
+  }
+}
+
 function applyStartupSettings() {
   if (process.platform !== "win32") return;
 
@@ -229,6 +324,8 @@ function applyStartupSettings() {
 async function nightBrightnessCheck() {
   if (!isNightTime()) return;
   if (Date.now() < snoozeUntilMs) return;
+  if (Date.now() < remindersDisabledUntilMs) return;
+  if (reminderDialogOpen) return;
 
   let brightness;
   try {
@@ -238,33 +335,8 @@ async function nightBrightnessCheck() {
   }
 
   if (brightness <= settings.brightnessThreshold) return;
-
-  const response = await dialog.showMessageBox(mainWindow, {
-    type: "question",
-    icon: getAppIcon(),
-    title: "Brightness Reminder",
-    message: `It's past ${formatNightTime()} and brightness is ${brightness}% (limit: ${settings.brightnessThreshold}%).`,
-    detail: "Would you like to lower it to reduce eye strain and help you wind down?",
-    buttons: [
-      "Dim to 0%",
-      `Set to ${settings.brightnessThreshold}%`,
-      `Snooze ${settings.snoozeMinutes} min`,
-      "Not now",
-    ],
-    defaultId: 0,
-    cancelId: 3,
-    noLink: true,
-  });
-
-  if (response.response === 0) {
-    await setBrightnessLevel(0);
-    mainWindow.webContents.send("brightness-updated");
-  } else if (response.response === 1) {
-    await setBrightnessLevel(settings.brightnessThreshold);
-    mainWindow.webContents.send("brightness-updated");
-  } else if (response.response === 2) {
-    snoozeUntilMs = Date.now() + settings.snoozeMinutes * 60 * 1000;
-  }
+  if (showReminderToast(brightness)) return;
+  await openReminderActionDialog(brightness);
 }
 
 function startNightCheck() {
