@@ -377,14 +377,27 @@ ipcMain.handle("save-settings", (_event, newSettings) => {
 
 ipcMain.on("minimize-to-tray", () => mainWindow.hide());
 
-// --- App lifecycle ---
+// --- Single instance lock ---
 
-app.whenReady().then(() => {
-  loadSettings();
-  applyStartupSettings();
-  createWindow();
-  createTray();
-  startNightCheck();
-});
+const gotTheLock = app.requestSingleInstanceLock();
 
-app.on("window-all-closed", (e) => e.preventDefault());
+if (!gotTheLock) {
+  app.quit();
+} else {
+  app.on("second-instance", () => {
+    if (mainWindow) {
+      mainWindow.show();
+      mainWindow.focus();
+    }
+  });
+
+  app.whenReady().then(() => {
+    loadSettings();
+    applyStartupSettings();
+    createWindow();
+    createTray();
+    startNightCheck();
+  });
+
+  app.on("window-all-closed", (e) => e.preventDefault());
+}
