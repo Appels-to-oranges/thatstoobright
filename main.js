@@ -370,7 +370,7 @@ function checkForUpdate() {
       try {
         const release = JSON.parse(body);
         const remote = (release.tag_name || "").replace(/^v/, "");
-        if (remote && remote !== pkg.version) {
+        if (/^\d+\.\d+/.test(remote) && remote !== pkg.version) {
           latestVersion = remote;
         }
       } catch { /* ignore */ }
