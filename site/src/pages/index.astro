@@ -43,16 +43,19 @@ const downloadUrl = `${repoUrl}/releases/latest/download/ThatsTooBright.exe`;
 
       body {
         margin: 0;
+        min-height: 100vh;
         font-family: Inter, "Segoe UI", system-ui, sans-serif;
         color: var(--text);
         background:
           radial-gradient(circle at 20% 10%, #243a6f66, transparent 40%),
           radial-gradient(circle at 80% 0%, #4b216966, transparent 30%),
           var(--bg);
+        background-repeat: no-repeat;
+        background-size: cover;
       }
 
       .shell {
-        width: min(1120px, 92vw);
+        width: min(70rem, 92vw);
         margin: 0 auto;
       }
 
@@ -60,7 +63,7 @@ const downloadUrl = `${repoUrl}/releases/latest/download/ThatsTooBright.exe`;
         display: flex;
         justify-content: space-between;
         align-items: center;
-        padding: 20px 0;
+        padding: 0.75rem 0;
       }
 
       .brand {
@@ -71,41 +74,43 @@ const downloadUrl = `${repoUrl}/releases/latest/download/ThatsTooBright.exe`;
       .hero {
         display: grid;
         grid-template-columns: 1.1fr 0.9fr;
-        gap: 22px;
-        padding: 36px 0 22px;
+        gap: 1rem;
+        padding: 1.25rem 0 1rem;
       }
 
       .panel {
         background: linear-gradient(180deg, #172543cc, #111a2ccc);
         border: 1px solid var(--line);
-        border-radius: 20px;
-        padding: 28px;
+        border-radius: 1rem;
+        padding: 1.5rem;
       }
 
       h1 {
-        font-size: clamp(2rem, 4vw, 3.4rem);
-        margin: 0 0 14px;
-        line-height: 1.08;
+        font-size: clamp(2rem, 4vw, 3.2rem);
+        margin: 0 0 0.75rem;
+        line-height: 1.1;
       }
 
       p {
         margin: 0;
         color: var(--muted);
-        line-height: 1.65;
+        line-height: 1.6;
+        font-size: 1.08rem;
       }
 
       .cta-row {
         display: flex;
         flex-wrap: wrap;
-        gap: 12px;
-        margin-top: 24px;
+        gap: 0.65rem;
+        margin-top: 1.25rem;
       }
 
       .btn {
         text-decoration: none;
         font-weight: 700;
-        border-radius: 12px;
-        padding: 12px 16px;
+        font-size: 1rem;
+        border-radius: 0.65rem;
+        padding: 0.6rem 1rem;
         border: 1px solid transparent;
         transition: 0.16s ease;
       }
@@ -129,63 +134,71 @@ const downloadUrl = `${repoUrl}/releases/latest/download/ThatsTooBright.exe`;
       .stats {
         display: grid;
         grid-template-columns: 1fr 1fr;
-        gap: 12px;
+        gap: 0.6rem;
       }
 
       .stat {
         border: 1px solid var(--line);
-        border-radius: 14px;
-        padding: 16px;
+        border-radius: 0.75rem;
+        padding: 0.85rem;
         background: #0f182d;
       }
 
       .stat strong {
         display: block;
-        font-size: 1.45rem;
+        font-size: 1.32rem;
+      }
+
+      .stat p {
+        font-size: 0.95rem;
       }
 
       .features {
-        margin: 24px 0 44px;
+        margin: 1rem 0 1.5rem;
         display: grid;
         grid-template-columns: repeat(3, 1fr);
-        gap: 14px;
+        gap: 0.75rem;
       }
 
       .feature {
         background: var(--card);
         border: 1px solid var(--line);
-        border-radius: 14px;
-        padding: 18px;
+        border-radius: 0.75rem;
+        padding: 1rem;
       }
 
       .feature h3 {
-        margin: 0 0 8px;
-        font-size: 1rem;
+        margin: 0 0 0.35rem;
+        font-size: 1.05rem;
+      }
+
+      .feature p {
+        font-size: 0.95rem;
       }
 
       .donate {
-        margin: 2px 0 20px;
+        margin: 0.125rem 0 1rem;
       }
 
       .donate-card {
         background: linear-gradient(180deg, #121b2f, #10182b);
         border: 1px solid var(--line);
-        border-radius: 14px;
-        padding: 14px;
+        border-radius: 0.75rem;
+        padding: 0.85rem;
         display: flex;
         align-items: center;
         justify-content: space-between;
-        gap: 14px;
+        gap: 0.85rem;
       }
 
       .donate-card h2 {
-        margin: 0 0 4px;
-        font-size: 0.95rem;
+        margin: 0 0 0.2rem;
+        font-size: 1.05rem;
       }
 
       .donate-card p {
         margin: 0;
-        font-size: 0.88rem;
+        font-size: 0.95rem;
         color: var(--muted);
       }
 
@@ -193,11 +206,11 @@ const downloadUrl = `${repoUrl}/releases/latest/download/ThatsTooBright.exe`;
         text-decoration: none;
         white-space: nowrap;
         font-weight: 700;
-        font-size: 0.9rem;
+        font-size: 0.95rem;
         color: #1f1602;
         background: linear-gradient(135deg, var(--brand-deep), var(--brand));
-        border-radius: 10px;
-        padding: 10px 14px;
+        border-radius: 0.55rem;
+        padding: 0.55rem 0.85rem;
         transition: 0.16s ease;
       }
 
@@ -207,12 +220,12 @@ const downloadUrl = `${repoUrl}/releases/latest/download/ThatsTooBright.exe`;
       }
 
       footer {
-        margin: 8px 0 34px;
+        margin: 0.5rem 0 1.75rem;
         color: #7483a9;
-        font-size: 0.9rem;
+        font-size: 0.95rem;
       }
 
-      @media (max-width: 900px) {
+      @media (max-width: 56rem) {
         .hero {
           grid-template-columns: 1fr;
         }
