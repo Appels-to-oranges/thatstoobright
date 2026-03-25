@@ -1,7 +1,9 @@
 const { app, BrowserWindow, ipcMain, Tray, Menu, dialog, nativeImage, Notification } = require("electron");
 const { exec } = require("child_process");
+const https = require("https");
 const path = require("path");
 const fs = require("fs");
+const pkg = require("./package.json");
 
 let mainWindow = null;
 let tray = null;
@@ -126,6 +128,12 @@ async function setBrightnessLevel(level) {
   lastBrightnessAt = Date.now();
 }
 
+function safeSendBrightnessUpdated() {
+  if (mainWindow && !mainWindow.isDestroyed()) {
+    mainWindow.webContents.send("brightness-updated");
+  }
+}
+
 // --- Window + Tray ---
 
 function getAppIcon() {
@@ -240,15 +248,16 @@ function showReminderToast(brightness) {
   notification.on("action", async (_event, index) => {
     if (index === 0) {
       await setBrightnessLevel(0);
-      mainWindow.webContents.send("brightness-updated");
     } else if (index === 1) {
       await setBrightnessLevel(settings.brightnessThreshold);
-      mainWindow.webContents.send("brightness-updated");
     }
+    safeSendBrightnessUpdated();
   });
 
   notification.on("click", () => {
-    openReminderActionDialog(brightness);
+    if (mainWindow && !mainWindow.isDestroyed()) {
+      openReminderActionDialog(brightness);
+    }
   });
 
   notification.on("close", () => {
@@ -296,10 +305,10 @@ async function openReminderActionDialog(brightness) {
 
     if (response.response === 0) {
       await setBrightnessLevel(0);
-      mainWindow.webContents.send("brightness-updated");
+      safeSendBrightnessUpdated();
     } else if (response.response === 1) {
       await setBrightnessLevel(settings.brightnessThreshold);
-      mainWindow.webContents.send("brightness-updated");
+      safeSendBrightnessUpdated();
     } else if (response.response === 2) {
       snoozeUntilMs = Date.now() + settings.snoozeMinutes * 60 * 1000;
     } else if (response.response === 3) {
@@ -344,6 +353,33 @@ function startNightCheck() {
   nightCheckInterval = setInterval(nightBrightnessCheck, CHECK_INTERVAL_MS);
 }
 
+// --- Update check ---
+
+function checkForUpdate() {
+  const repo = "Appels-to-oranges/thatstoobright";
+  const options = {
+    hostname: "api.github.com",
+    path: `/repos/${repo}/releases/latest`,
+    headers: { "User-Agent": APP_NAME },
+  };
+
+  https.get(options, (res) => {
+    let body = "";
+    res.on("data", (chunk) => (body += chunk));
+    res.on("end", () => {
+      try {
+        const release = JSON.parse(body);
+        const remote = (release.tag_name || "").replace(/^v/, "");
+        if (remote && remote !== pkg.version) {
+          latestVersion = remote;
+        }
+      } catch { /* ignore */ }
+    });
+  }).on("error", () => { /* silent */ });
+}
+
+let latestVersion = null;
+
 // --- IPC handlers ---
 
 ipcMain.handle("get-brightness", () => getCurrentBrightness());
@@ -353,6 +389,11 @@ ipcMain.handle("set-brightness", async (_event, value) => {
   await setBrightnessLevel(level);
   return level;
 });
+
+ipcMain.handle("get-app-info", () => ({
+  version: pkg.version,
+  latestVersion,
+}));
 
 ipcMain.handle("get-settings", () => ({ ...settings }));
 
@@ -397,6 +438,7 @@ if (!gotTheLock) {
     createWindow();
     createTray();
     startNightCheck();
+    checkForUpdate();
   });
 
   app.on("window-all-closed", (e) => e.preventDefault());

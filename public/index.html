@@ -383,6 +383,47 @@
     }
 
     .back-label:hover { color: #facc15; }
+
+    .app-footer {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      margin-top: auto;
+      padding-top: 8px;
+      font-size: 11px;
+      color: #3f3f46;
+    }
+
+    .update-badge {
+      color: #facc15;
+      cursor: pointer;
+      text-decoration: underline;
+      text-underline-offset: 2px;
+    }
+
+    .update-badge:hover { color: #fde047; }
+
+    .unsupported-banner {
+      background: #7f1d1d;
+      border: 1px solid #991b1b;
+      border-radius: 10px;
+      padding: 10px 14px;
+      margin-bottom: 14px;
+      font-size: 12px;
+      color: #fca5a5;
+      line-height: 1.4;
+      display: none;
+    }
+
+    :focus-visible {
+      outline: 2px solid #facc15;
+      outline-offset: 2px;
+    }
+
+    input[type="range"]:focus-visible {
+      outline-offset: 4px;
+    }
   </style>
 </head>
 <body>
@@ -397,6 +438,10 @@
   </div>
 
   <div class="card">
+    <div class="unsupported-banner" id="unsupportedBanner">
+      Brightness control requires a laptop display. External monitors are not supported by Windows WMI.
+    </div>
+
     <!-- Brightness page -->
     <div class="page active" id="pageBrightness">
       <div class="header">
@@ -489,6 +534,11 @@
       <button class="save-btn" id="saveBtn">Save Settings</button>
 
       <div class="status" id="settingsStatus"></div>
+    </div>
+
+    <div class="app-footer">
+      <span id="versionLabel"></span>
+      <span class="update-badge" id="updateBadge" style="display:none"></span>
     </div>
   </div>
 
@@ -592,6 +642,10 @@
       }, 3000);
     }
 
+    slider.addEventListener("pointerdown", () => {
+      sliderIsInteracting = true;
+    });
+
     slider.addEventListener("input", () => {
       sliderIsInteracting = true;
       const val = parseInt(slider.value, 10);
@@ -688,11 +742,52 @@
       }
     });
 
+    // --- Visibility change: refresh when window becomes visible ---
+
+    document.addEventListener("visibilitychange", () => {
+      if (!document.hidden && !sliderIsInteracting && !onSettingsPage) {
+        fetchBrightness();
+      }
+      if (!document.hidden) {
+        sliderIsInteracting = false;
+      }
+    });
+
+    // --- Desktop monitor detection ---
+
+    async function checkBrightnessSupport() {
+      try {
+        await window.brightness.get();
+      } catch {
+        document.getElementById("unsupportedBanner").style.display = "block";
+      }
+    }
+
+    // --- Version + update badge ---
+
+    async function loadAppInfo() {
+      try {
+        const info = await window.brightness.getAppInfo();
+        const label = document.getElementById("versionLabel");
+        label.textContent = "v" + info.version;
+        if (info.latestVersion && info.latestVersion !== info.version) {
+          const badge = document.getElementById("updateBadge");
+          badge.textContent = "v" + info.latestVersion + " available";
+          badge.style.display = "inline";
+          badge.addEventListener("click", () => {
+            window.open("https://github.com/Appels-to-oranges/thatstoobright/releases/latest");
+          });
+        }
+      } catch { /* non-critical */ }
+    }
+
     // --- Init ---
 
     fetchBrightness();
     loadSettings();
     startBrightnessAutoRefresh();
+    checkBrightnessSupport();
+    setTimeout(loadAppInfo, 2000);
 
     window.addEventListener("beforeunload", () => {
       if (brightnessRefreshTimer) clearInterval(brightnessRefreshTimer);

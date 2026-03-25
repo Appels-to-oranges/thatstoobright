@@ -7,4 +7,5 @@ contextBridge.exposeInMainWorld("brightness", {
   onBrightnessUpdated: (callback) => ipcRenderer.on("brightness-updated", callback),
   getSettings: () => ipcRenderer.invoke("get-settings"),
   saveSettings: (settings) => ipcRenderer.invoke("save-settings", settings),
+  getAppInfo: () => ipcRenderer.invoke("get-app-info"),
 });

@@ -57,4 +57,4 @@ npm run start
 Recommended download target:
 
 - GitHub Releases latest asset URL, e.g.  
-  `https://github.com/<your-username>/thatstoobright/releases/latest/download/ThatsTooBright.exe`
+  `https://github.com/Appels-to-oranges/thatstoobright/releases/latest/download/ThatsTooBright.exe`
